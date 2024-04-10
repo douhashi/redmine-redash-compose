@@ -1,5 +1,0 @@
-export REDMINE_DB_DATABASE=redmine
-export REDMINE_DB_USERNAME=redmine
-export REDMINE_DB_PASSWORD=password
-export REDMINE_SECRET_KEY_BASE=jNHrWYsqk60oWOGEJxYqexyBzckonSyt9pxpoGM0x2lszFEtcN2HBnY6tgl6Pl5yT15q3y1bOY95JfN11NPZLzaFousk4rGclOfsnvJih8som9RpytYYp8Q3LwjWYH0Z
-

@@ -5,26 +5,52 @@ services:
     image: redmine:5.1
     ports:
       - 3000:3000
-    environment:
-      REDMINE_DB_POSTGRES: redmine-db
-      REDMINE_DB_DATABASE: ${REDMINE_DB_DATABASE}
-      REDMINE_DB_USERNAME: ${REDMINE_DB_USERNAME}
-      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD}
-      REDMINE_SECRET_KEY_BASE: ${REDMINE_SECRET_KEY_BASE}
-      REDMINE_DB_PORT: 5432
+    env_file:
+      - ./envs/redmine.env
     volumes:
       - redmine-files:/usr/src/redmine/files
     links:
       - redmine-db
-
   redmine-db:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${REDMINE_DB_DATABASE}
-      POSTGRES_USER: ${REDMINE_DB_USERNAME}
-      POSTGRES_PASSWORD: ${REDMINE_DB_PASSWORD}
+    env_file:
+      - ./envs/redmine.env
     volumes:
       - redmine-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  redash-server:
+    image: redash/redash:10.1.0.b50633
+    command: server
+    ports:
+      - 5000:5000
+    env_file:
+      - ./envs/redash.env
+    links:
+      - redash-redis
+      - redash-db
+      - redmine-db
+  redash-worker:
+    image: redash/redash:10.1.0.b50633
+    command: worker
+    env_file:
+      - ./envs/redash.env
+    links:
+      - redash-redis
+      - redash-db
+      - redmine-db
+  redash-redis:
+    image: redis:7-alpine
+  redash-db:
+    image: postgres:16-alpine
+    env_file:
+      - ./envs/redash.env
+    volumes:
+      - redash-db:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 10s
@@ -34,6 +60,5 @@ services:
 volumes:
   redmine-files:
   redmine-db:
-
-
+  redash-db:
 
