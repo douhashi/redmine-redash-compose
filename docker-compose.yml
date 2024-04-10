@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+  redmine:
+    image: redmine:5.1
+    ports:
+      - 3000:3000
+    environment:
+      REDMINE_DB_POSTGRES: redmine-db
+      REDMINE_DB_DATABASE: ${REDMINE_DB_DATABASE}
+      REDMINE_DB_USERNAME: ${REDMINE_DB_USERNAME}
+      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD}
+      REDMINE_SECRET_KEY_BASE: ${REDMINE_SECRET_KEY_BASE}
+      REDMINE_DB_PORT: 5432
+    volumes:
+      - redmine-files:/usr/src/redmine/files
+    links:
+      - redmine-db
+
+  redmine-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${REDMINE_DB_DATABASE}
+      POSTGRES_USER: ${REDMINE_DB_USERNAME}
+      POSTGRES_PASSWORD: ${REDMINE_DB_PASSWORD}
+    volumes:
+      - redmine-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redmine-files:
+  redmine-db:
+
+
+
